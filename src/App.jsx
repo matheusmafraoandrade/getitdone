@@ -43,7 +43,7 @@ function App() {
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-      <div className="flex flex-col sm:flex-row justify-center h-screen">
+      <div className="flex flex-col sm:flex-row justify-center">
         <Toaster />
         <BrowserRouter>
           {user ? (
@@ -56,13 +56,15 @@ function App() {
                         {isMobile ? (
                           <Topbar />
                         ) : (
-                          <Sidebar
-                            selectedPriority={selectedPriority}
-                            setSelectedPriority={setSelectedPriority}
-                            rerender={rerender}
-                          />
+                          <div className="w-[240px] h-screen fixed top-0 left-0 overflow-y-auto">
+                            <Sidebar
+                              selectedPriority={selectedPriority}
+                              setSelectedPriority={setSelectedPriority}
+                              rerender={rerender}
+                            />
+                          </div>
                         )}
-                        <div className="mt-6 sm:mt-0 flex-grow h-screen">
+                        <div className="mt-6 sm:mt-0 flex-grow h-screen sm:ml-[240px] sm:mr-[200px]">
                           <Routes>
                             <Route exact path="/" element={<Home />} />
                             <Route
@@ -84,12 +86,14 @@ function App() {
                           </Routes>
                         </div>
                         {!isMobile && (
-                          <MembersBar
-                            users={users}
-                            chats={chats}
-                            setSelectedChat={setSelectedChat}
-                            setChatIsOpen={setChatIsOpen}
-                          />
+                          <div className="w-[200px] h-screen fixed top-0 right-0 overflow-y-auto">
+                            <MembersBar
+                              users={users}
+                              chats={chats}
+                              setSelectedChat={setSelectedChat}
+                              setChatIsOpen={setChatIsOpen}
+                            />
+                          </div>
                         )}
                         {chatIsOpen && (
                           <Chat
