@@ -2,18 +2,58 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // This rule allows anyone with your Firestore database reference to view, edit,
-    // and delete all data in your Firestore database. It is useful for getting
-    // started, but it is configured to expire after 30 days because it
-    // leaves your app open to attackers. At that time, all client
-    // requests to your Firestore database will be denied.
-    //
-    // Make sure to write security rules for your app before that time, or else
-    // all client requests to your Firestore database will be denied until you Update
-    // your rules
+    function isAdmin() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.admin == 'fhwrgvo9u3t54b';
+    }
+    function belongsToTeam(teamId) {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId
+    }
+    function isOwner() {
+      return request.auth.uid == resource.data.ownerId || request.auth.uid == resource.data.userId;
+    }
+    function teamsMatch() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == resource.data.teamId;
+    }
+    function isChatParticipant() {
+      return resource.data.participants.hasAny([request.auth.uid]);
+    }
+    function isChatParticipantMsg(chatId) {
+      return get(/databases/$(database)/documents/chats/$(chatId)).data.participants.hasAny([request.auth.uid]);
+    }
+    function idsMatch(userId) {
+      return request.auth.uid == userId;
+    }
+    function isSignedIn() {
+      return request.auth.uid != null;
+    }
     match /{document=**} {
-      allow read, write: if request.time < timestamp.date(2024, 1, 3);
+      allow read, write: if false; // BLOCO MAIS IMPORTANTE DO APP!
+    }
+    match /users/{userId} {
+      allow delete: if false;
+      allow create: if isSignedIn() && idsMatch();
+      allow update: if
+          isSignedIn() && idsMatch(userId)
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['email', 'id', 'admin']);
+      allow read:
+          if isSignedIn() && (idsMatch(userId) || isAdmin() || teamsMatch());
+    }
+    match /teams/{teamId} {
+      allow create: if SignedIn()
+      allow read, update: if isSignedIn() && belongsToTeam(teamId);
+      allow delete: if false;
+    }
+    match /teams/{teamId}/tasks/{taskId} {
+      allow read, create: if isSignedIn() && belongsToTeam(teamId);
+      allow update, delete: if isSignedIn() && belongsToTeam(teamId);
+    }
+    match /chats/{document=**} {
+      allow create: if isSignedIn();
+      allow read, update, delete: if isSignedIn() && isChatParticipant();
+    }
+    match /chats/{chatId}/messages/{messageId} {
+      allow create: if isSignedIn() && isChatParticipantMsg(chatId);
+      allow read, update, delete: if isSignedIn() && isChatParticipantMsg(chatId);
     }
   }
 }

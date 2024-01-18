@@ -11,6 +11,7 @@ export const useSignup = () => {
   const [isPending, setIsPending] = useState(false);
   const { dispatch } = useAuthContext();
   const { updateDocument } = useFirestore("users");
+  const { addDocument: addTeam } = useFirestore("teams");
 
   const signup = async (email, password, name) => {
     setError(null);
@@ -26,16 +27,24 @@ export const useSignup = () => {
       }
 
       // Add display name to user
-      await updateProfile(auth.currentUser, { displayName: name });
+      await updateProfile(res.user, { displayName: name });
 
       // Create a user document
       const createdAt = timestamp;
-      setDoc(doc(db, "users", res.user.uid), {
+
+      const { payload: teamId } = await addTeam({
+        name: `${name}'s Team`,
+        createdAt,
+        users: [res.user.uid],
+      });
+
+      await setDoc(doc(db, "users", res.user.uid), {
         id: res.user.uid,
         online: true,
         createdAt,
         email: email,
         name: name,
+        teamId,
       });
 
       // Dispatch login action

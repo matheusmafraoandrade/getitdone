@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Skeleton } from "@/shadcn/components/ui/skeleton";
 import { useAuthContext } from "@/hooks/useAuthContext";
+import { useUsersContext } from "@/hooks/useUsersContext";
 
 function MemberSkeleton() {
   return (
@@ -11,13 +12,9 @@ function MemberSkeleton() {
   );
 }
 
-export default function Membersbar({
-  setSelectedChat,
-  setChatIsOpen,
-  chats,
-  users,
-}) {
+export default function Membersbar({ setSelectedChat, setChatIsOpen, chats }) {
   const { user } = useAuthContext();
+  const { users } = useUsersContext();
   const usersLength = Number(localStorage.getItem("usersLength"));
 
   const openChat = (userId, userName) => {

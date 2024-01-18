@@ -32,7 +32,9 @@ export default function KanbanBoard({
   const { updateDocument: updateTeam, updateSubDocument: updateTask } =
     useFirestore("teams");
   const { userDoc } = useUserContext();
+
   const { document: teamDoc } = useDocument("teams", userDoc.teamId);
+
   const { documents: tasks } = useSubcollection(
     "teams",
     userDoc.teamId,

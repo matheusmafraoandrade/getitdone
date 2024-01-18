@@ -15,15 +15,16 @@ import { useFirestore } from "@/hooks/useFirestore";
 import { useState } from "react";
 import { ChevronLeftIcon, Cross1Icon } from "@radix-ui/react-icons";
 import { timestamp } from "@/firebase/config";
+import { useUsersContext } from "@/hooks/useUsersContext";
 
 export default function Chat({
   selectedChat,
   chats,
   setSelectedChat,
   setChatIsOpen,
-  users,
 }) {
   const { user } = useAuthContext();
+  const { users } = useUsersContext();
   const {
     updateDocument: updateChat,
     addDocument: createChat,
@@ -172,14 +173,20 @@ export default function Chat({
                 </p>
               )
             : chats?.map((chat) => {
-                const chatUser = users.find(
-                  (u) => chat.participants.includes(u.id) && u.id !== user.uid
+                const chatUser = users?.find(
+                  (u) => chat?.participants.includes(u.id) && u.id !== user.uid
                 );
+
+                if (!chatUser) {
+                  // Usuário não encontrado, pode tratar isso conforme necessário
+                  return null;
+                }
+
                 return (
                   <>
                     <div
                       key={chat.id}
-                      onClick={() => openChat(chat, chatUser.name)}
+                      onClick={() => openChat(chat, chatUser?.name)}
                       role="button"
                       className="relative"
                     >
@@ -187,11 +194,11 @@ export default function Chat({
                         <Avatar className="h-12 w-12">
                           <AvatarImage src="" />
                           <AvatarFallback className="bg-primary/50">
-                            {getInitials(chatUser.name)}
+                            {getInitials(chatUser?.name)}
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="font-semibold">{chatUser.name}</p>
+                          <p className="font-semibold">{chatUser?.name}</p>
                           <p className="text-muted-foreground text-sm">
                             {chat.lastMessage.content}
                           </p>

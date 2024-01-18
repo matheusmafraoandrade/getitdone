@@ -110,7 +110,19 @@ export default function Task({ task, index, columnId }) {
               <div className="flex items-center gap-1.5">
                 <LabelSvg color={getPriorityColor(task?.priority)} />
                 <p className="text-muted-foreground text-sm">
-                  Faltam {calculateDaysUntilDue(task?.dueDate?.seconds)} dias
+                  {calculateDaysUntilDue(task?.dueDate?.seconds) > 0 ? (
+                    <span>
+                      Faltam {calculateDaysUntilDue(task?.dueDate?.seconds)}{" "}
+                      dias
+                    </span>
+                  ) : calculateDaysUntilDue(task?.dueDate?.seconds) === 0 ? (
+                    <span>Entrega hoje</span>
+                  ) : (
+                    <span>
+                      {calculateDaysUntilDue(task?.dueDate?.seconds) * -1} dias
+                      de atraso
+                    </span>
+                  )}
                 </p>
               </div>
             </div>
